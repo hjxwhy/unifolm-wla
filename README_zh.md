@@ -15,8 +15,8 @@ UnifoLM-WLA-1.0 是宇树科技全面升级的新一代通用人形机器人基�
 
 ## 🔥 新闻
 
-- 2026年9月11日：🚀，我们发布了模型权重 [UnifoLM-ER-1](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)
-- 2026年9月11日：🚀，我们发布了模型权重 [UnifoLM-ER-Flow](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)
+- 2026年9月11日：🚀 我们发布了模型权重 [UnifoLM-ER-1](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)
+- 2026年9月11日：🚀 我们发布了模型权重 [UnifoLM-ER-Flow](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)
 
 ## 📑 开源计划
 

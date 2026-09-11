@@ -1,6 +1,8 @@
 # unifolm-wla
 <div align="center">
 
+[<kbd>English</kbd>](README.md) | [<kbd>简体中文</kbd>](README_zh.md)
+
 [Project Page](https://unigen-x.github.io/unifolm-wla.github.io/) | [Models](https://huggingface.co/collections/unitreerobotics/unifolm-wla-10) | [Datasets](https://huggingface.co/collections/unitreerobotics/unifolm-wla-10)
 
 <p align="center">

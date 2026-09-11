@@ -28,6 +28,6 @@ UnifoLM-WLA-1.0 is Unitree Robotics' comprehensively upgraded, next-generation g
   - [x] [**UnifoLM-ER-Flow**](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)
   - [ ] UnifoLM-WLA-1.0
 - **Datasets**
-  - [x] [**UniBot-V1 Challenge**](https://huggingface.co/collections/unitreerobotics/unibot-v1-challenge)
-  - [ ] Unitree-WholeBody
+  - [x] [**UniBot-V1 Challenge Dataset**](https://huggingface.co/collections/unitreerobotics/unibot-v1-challenge)
+  - [ ] Unitree-WBT-Dataset
   - [ ] Unitree-Manipulation

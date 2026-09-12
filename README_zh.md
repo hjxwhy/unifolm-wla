@@ -25,7 +25,7 @@ UnifoLM-WLA-1.0 是宇树科技全面升级的新一代通用人形机器人基�
 - **模型**
   - [x] [**UnifoLM-ER-1**](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)
   - [x] [**UnifoLM-ER-Flow**](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)
-  - [ ] UnifoLM-WLA-1.0
+  - [ ] UnifoLM-WLA-Base
 - **数据集**
   - [x] [**UniBot-V1 Challenge Dataset**](https://huggingface.co/collections/unitreerobotics/unibot-v1-challenge)
   - [ ] Unitree-WBT-Dataset

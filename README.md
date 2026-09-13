@@ -14,6 +14,10 @@
 
 UnifoLM-WLA-1.0 is Unitree Robotics' comprehensively upgraded, next-generation general-purpose humanoid robot foundation model with 6B parameters. Built on large-scale general multimodal perception and understanding data and interaction-centric world modeling, it substantially advances spatial perception and understanding, achieving leading results across multiple embodied reasoning benchmarks. Trained on approximately 2,500 hours of high-quality real-robot data, a single model coordinates 64 tasks spanning desktop manipulation and whole-body manipulation. It supports two-finger grippers and multiple five-finger dexterous hands, with strong generalization across tasks and end effectors.
 
+## 📘 Technical Documentation
+
+- [Robot action, state, and statistics processing (Chinese)](docs/robot_action_state_processing.md)
+
 ## 🔥 News
 
 - Sep 11, 2026: 🚀 we released the model weights of [UnifoLM-ER-1](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)

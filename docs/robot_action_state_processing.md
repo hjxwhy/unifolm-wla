@@ -1,4 +1,7 @@
 # 机器人动作、状态与统计量处理规范
+
+**中文** | [English](robot_action_state_processing_en.md)
+
 ## 摘要
 
 本规范将不同机器人本体的数据映射到统一的动作空间和状态空间：
@@ -1375,7 +1378,7 @@ Q_{0.99}^{LR}
 ```math
 \text{任务级统计}
 \longrightarrow
-\text{跨任务/变体合并}
+\text{同一本体跨任务合并}
 \longrightarrow
 \text{左右手合并}
 \longrightarrow

@@ -53,11 +53,11 @@ gripper_norm_type: minmax_q
 
 掩码使用布尔类型：
 
-$$
+```math
 \mathbf m^a\in\{0,1\}^{54},
 \qquad
 \mathbf m^s\in\{0,1\}^{60}.
-$$
+```
 
 ### 1.3 坐标和单位约定
 
@@ -93,7 +93,7 @@ $$
 
 整体关系可写为：
 
-$$
+```math
 \text{原始状态}
 \longrightarrow
 \text{状态格式转换}
@@ -101,9 +101,9 @@ $$
 \text{状态归一化}
 \longrightarrow
 \mathbf s_t,
-$$
+```
 
-$$
+```math
 (\text{当前状态},\text{未来动作})
 \longrightarrow
 \text{相对动作}
@@ -113,11 +113,11 @@ $$
 \text{重采样}
 \longrightarrow
 \mathbf A_t.
-$$
+```
 
 其中
 
-$$
+```math
 \mathbf A_t=
 \begin{bmatrix}
 \mathbf a_{t,0}^{\mathsf T}\\
@@ -126,7 +126,7 @@ $$
 \mathbf a_{t,H-1}^{\mathsf T}
 \end{bmatrix}
 \in\mathbb R^{H\times54}.
-$$
+```
 
 ---
 
@@ -155,25 +155,25 @@ $$
 
 左、右末端动作均采用以下 6 维排列：
 
-$$
+```math
 \mathbf a^{ee}_{t,k}
 =
 [\Delta x,\Delta y,\Delta z,\phi_x,\phi_y,\phi_z]^{\mathsf T}.
-$$
+```
 
 前三维是当前末端坐标系下的相对平移，后三维是相对旋转的旋转向量。
 
 旋转向量定义为：
 
-$$
+```math
 \boldsymbol\phi=\theta\mathbf u,
-$$
+```
 
 其中 $\mathbf u$ 是单位旋转轴，$\theta$ 是旋转角。因此：
 
-$$
+```math
 \|\boldsymbol\phi\|_2=\theta.
-$$
+```
 
 ### 3.3 非位姿动作
 
@@ -193,11 +193,11 @@ $$
 
 初始化：
 
-$$
+```math
 \mathbf a_{t,k}=\mathbf 0\in\mathbb R^{54},
 \qquad
 \mathbf m^a=\mathbf 0\in\{0,1\}^{54}.
-$$
+```
 
 对当前机器人存在的模块：
 
@@ -237,54 +237,54 @@ $$
 
 设旋转矩阵为
 
-$$
+```math
 R=
 \begin{bmatrix}
 R_{00}&R_{01}&R_{02}\\
 R_{10}&R_{11}&R_{12}\\
 R_{20}&R_{21}&R_{22}
 \end{bmatrix}.
-$$
+```
 
 本规范使用旋转矩阵前两列构造 rotation-6D：
 
-$$
+```math
 \rho_6(R)=
 [R_{00},R_{10},R_{20},R_{01},R_{11},R_{21}]^{\mathsf T}.
-$$
+```
 
 因此末端绝对状态为：
 
-$$
+```math
 \mathbf s^{ee}_t=
 [x,y,z,\rho_6(R_t)^{\mathsf T}]^{\mathsf T}
 \in\mathbb R^9.
-$$
+```
 
 如果需要从一般的两个三维向量 $\mathbf a_1,\mathbf a_2$ 恢复旋转矩阵，使用 Gram–Schmidt 正交化：
 
-$$
+```math
 \mathbf b_1=
 \frac{\mathbf a_1}{\|\mathbf a_1\|_2},
-$$
+```
 
-$$
+```math
 \widetilde{\mathbf b}_2
 =
 \mathbf a_2-(\mathbf b_1^{\mathsf T}\mathbf a_2)\mathbf b_1,
-$$
+```
 
-$$
+```math
 \mathbf b_2=
 \frac{\widetilde{\mathbf b}_2}
 {\|\widetilde{\mathbf b}_2\|_2},
 \qquad
 \mathbf b_3=\mathbf b_1\times\mathbf b_2,
-$$
+```
 
-$$
+```math
 R=[\mathbf b_1,\mathbf b_2,\mathbf b_3].
-$$
+```
 
 所有数据生成、训练和部署模块必须使用相同的“前两列”约定。
 
@@ -292,7 +292,7 @@ $$
 
 状态槽位 `[41:47]` 不表示底盘绝对位姿，而表示机体坐标系 $B$ 下的重力方向和角速度：
 
-$$
+```math
 \boxed{
 \mathbf s_t^{base}=
 [
@@ -304,7 +304,7 @@ g_z^B,\,
 \hat\omega_z^B
 ]^{\mathsf T}
 }
-$$
+```
 
 其中：
 
@@ -316,30 +316,30 @@ $$
 
 设 $R_{WB}$ 表示把机体坐标系向量转换到世界坐标系的旋转矩阵，世界坐标系中的单位重力方向定义为：
 
-$$
+```math
 \mathbf g^W=[0,0,-1]^{\mathsf T}.
-$$
+```
 
 则机体坐标系中的重力方向为：
 
-$$
+```math
 \mathbf g^B=R_{WB}^{\mathsf T}\mathbf g^W.
-$$
+```
 
 为消除输入四元数或旋转矩阵的数值误差，写入状态前再次单位化：
 
-$$
+```math
 \mathbf g^B
 \leftarrow
 \frac{\mathbf g^B}
 {\max(\|\mathbf g^B\|_2,\epsilon)},
-$$
+```
 
 其中建议取 $\epsilon=10^{-8}$。因此理论上应满足：
 
-$$
+```math
 \|\mathbf g^B\|_2=1.
-$$
+```
 
 重力方向只编码机体相对于重力方向的俯仰和横滚信息，不包含世界坐标系中的绝对位置，也不提供绕重力轴的绝对偏航角。
 
@@ -347,14 +347,14 @@ $$
 
 原始机体角速度为：
 
-$$
+```math
 \boldsymbol\omega^B=
 [\omega_x^B,\omega_y^B,\omega_z^B]^{\mathsf T}.
-$$
+```
 
 按照状态角速度统计量进行逐维归一化：
 
-$$
+```math
 \widehat{\boldsymbol\omega}^B
 =
 \frac{
@@ -362,41 +362,41 @@ $$
 }{
 \mathbf c_{\omega}
 }.
-$$
+```
 
 默认使用 `state_norm_type=minmax_q`，因此：
 
-$$
+```math
 \mathbf o_{\omega}
 =
 \frac{
 Q_{0.01}(\boldsymbol\omega^B)+
 Q_{0.99}(\boldsymbol\omega^B)
 }{2},
-$$
+```
 
-$$
+```math
 \mathbf c_{\omega}
 =
 \frac{
 Q_{0.99}(\boldsymbol\omega^B)-
 Q_{0.01}(\boldsymbol\omega^B)
 }{2}.
-$$
+```
 
 若数据入口已经提供 $\widehat{\boldsymbol\omega}^B$，则直接写入 `[44:47]`，不得重复归一化。
 
 #### 4.3.3 槽位映射
 
-$$
+```math
 [g_x^B,g_y^B,g_z^B]
 \longrightarrow[41:44],
-$$
+```
 
-$$
+```math
 [\hat\omega_x^B,\hat\omega_y^B,\hat\omega_z^B]
 \longrightarrow[44:47].
-$$
+```
 
 该状态块不包含底盘 xyz 位置，也不包含 rotation vector。动作空间 `[35:41]` 的底盘动作定义保持不变，仍然表示相对底盘位姿的 xyz + rotation vector。
 
@@ -404,11 +404,11 @@ $$
 
 状态向量和状态掩码初始化为：
 
-$$
+```math
 \mathbf s_t=\mathbf 0\in\mathbb R^{60},
 \qquad
 \mathbf m^s=\mathbf 0\in\{0,1\}^{60}.
-$$
+```
 
 存在的状态模块写入固定槽位，并将对应掩码置为 1；不存在的模块保持为 0。若状态模块短于目标槽位，则在尾部补 0，并仍将整个槽位标为有效；若长于目标槽位，则只保留槽位允许的前若干维。因此，状态字段维数也应在数据接入阶段严格校验。
 
@@ -418,13 +418,13 @@ $$
 
 所有相对位姿计算必须先将输入转换为 SE(3) 齐次变换：
 
-$$
+```math
 T=
 \begin{bmatrix}
 R&\mathbf p\\
 \mathbf 0^{\mathsf T}&1
 \end{bmatrix}.
-$$
+```
 
 其中 $\mathbf p=[x,y,z]^{\mathsf T}$。
 
@@ -432,46 +432,46 @@ $$
 
 输入排列为：
 
-$$
+```math
 [x,y,z,r,p,y].
-$$
+```
 
 这里最后一个 $y$ 表示 yaw。为避免符号混淆，下文写为 $r,p,\psi$。
 
 定义：
 
-$$
+```math
 R_x(r)=
 \begin{bmatrix}
 1&0&0\\
 0&\cos r&-\sin r\\
 0&\sin r&\cos r
 \end{bmatrix},
-$$
+```
 
-$$
+```math
 R_y(p)=
 \begin{bmatrix}
 \cos p&0&\sin p\\
 0&1&0\\
 -\sin p&0&\cos p
 \end{bmatrix},
-$$
+```
 
-$$
+```math
 R_z(\psi)=
 \begin{bmatrix}
 \cos\psi&-\sin\psi&0\\
 \sin\psi&\cos\psi&0\\
 0&0&1
 \end{bmatrix}.
-$$
+```
 
 采用固定轴 `xyz` 欧拉角约定：
 
-$$
+```math
 R=R_z(\psi)R_y(p)R_x(r).
-$$
+```
 
 所有角度均为弧度。
 
@@ -479,51 +479,51 @@ $$
 
 输入排列为：
 
-$$
+```math
 [x,y,z,q_x,q_y,q_z,q_w].
-$$
+```
 
 首先归一化四元数：
 
-$$
+```math
 \bar{\mathbf q}=
 \frac{\mathbf q}{\|\mathbf q\|_2}.
-$$
+```
 
 令归一化后的四元数仍记为 $(q_x,q_y,q_z,q_w)$，旋转矩阵为：
 
-$$
+```math
 R=
 \begin{bmatrix}
 1-2(q_y^2+q_z^2) & 2(q_xq_y-q_zq_w) & 2(q_xq_z+q_yq_w)\\
 2(q_xq_y+q_zq_w) & 1-2(q_x^2+q_z^2) & 2(q_yq_z-q_xq_w)\\
 2(q_xq_z-q_yq_w) & 2(q_yq_z+q_xq_w) & 1-2(q_x^2+q_y^2)
 \end{bmatrix}.
-$$
+```
 
 ### 5.3 xyz + rotation vector
 
 输入排列为：
 
-$$
+```math
 [x,y,z,\phi_x,\phi_y,\phi_z].
-$$
+```
 
 令
 
-$$
+```math
 \boldsymbol\phi=[\phi_x,\phi_y,\phi_z]^{\mathsf T},
 \qquad
 \theta=\|\boldsymbol\phi\|_2.
-$$
+```
 
 当 $\theta>0$ 时，令 $\mathbf u=\boldsymbol\phi/\theta$，通过 Rodrigues 公式计算：
 
-$$
+```math
 R=
 I+\sin\theta[\mathbf u]_{\times}
 +(1-\cos\theta)[\mathbf u]_{\times}^2.
-$$
+```
 
 当 $\theta$ 接近 0 时，应使用稳定的小角度展开或成熟的 SO(3) 实现。
 
@@ -535,63 +535,63 @@ $$
 
 设当前状态位姿为：
 
-$$
+```math
 T_t=
 \begin{bmatrix}
 R_t&\mathbf p_t\\
 \mathbf 0^{\mathsf T}&1
 \end{bmatrix},
-$$
+```
 
 第 $k$ 个未来动作目标为：
 
-$$
+```math
 T_{t+k}=
 \begin{bmatrix}
 R_{t+k}&\mathbf p_{t+k}\\
 \mathbf 0^{\mathsf T}&1
 \end{bmatrix}.
-$$
+```
 
 当前位姿的逆为：
 
-$$
+```math
 T_t^{-1}=
 \begin{bmatrix}
 R_t^{\mathsf T}&-R_t^{\mathsf T}\mathbf p_t\\
 \mathbf 0^{\mathsf T}&1
 \end{bmatrix}.
-$$
+```
 
 相对动作定义为：
 
-$$
+```math
 T^{rel}_{t,k}=T_t^{-1}T_{t+k}.
-$$
+```
 
 展开可得：
 
-$$
+```math
 R^{rel}_{t,k}=R_t^{\mathsf T}R_{t+k},
-$$
+```
 
-$$
+```math
 \mathbf p^{rel}_{t,k}
 =R_t^{\mathsf T}(\mathbf p_{t+k}-\mathbf p_t).
-$$
+```
 
 因此，相对平移位于当前末端或当前底盘的局部坐标系中，而不是世界坐标系中的直接位置差。
 
 最终将相对旋转矩阵转换为旋转向量：
 
-$$
+```math
 \boldsymbol\phi^{rel}_{t,k}
-=\operatorname{Log}(R^{rel}_{t,k})^{\vee}.
-$$
+=\mathrm{Log}(R^{rel}_{t,k})^{\vee}.
+```
 
 输出相对动作：
 
-$$
+```math
 \mathbf a^{rel}_{t,k}
 =
 \begin{bmatrix}
@@ -599,7 +599,7 @@ $$
 \boldsymbol\phi^{rel}_{t,k}
 \end{bmatrix}
 \in\mathbb R^6.
-$$
+```
 
 ### 6.2 相对动作伪代码
 
@@ -630,7 +630,7 @@ function relative_pose(current_pose, future_poses, pose_format):
 
 对数据集中的每个有效当前状态，按照第 6 节的方法计算整个未来动作块：
 
-$$
+```math
 \mathbf A^{(n)}
 =
 \begin{bmatrix}
@@ -640,38 +640,38 @@ $$
 \mathbf a^{rel}_{n,H-1}
 \end{bmatrix}
 \in\mathbb R^{H\times d},
-$$
+```
 
 其中 $n=1,\ldots,N$ 表示不同样本，$H$ 是动作块长度，末端或底盘相对位姿的维数为 $d=6$。
 
 将所有样本和所有未来时间步合并为同一个二维数组：
 
-$$
+```math
 X_{rel}
 =
-\operatorname{reshape}
+\mathrm{reshape}
 \left(
 \{\mathbf A^{(n)}\}_{n=1}^{N},
 (NH,d)
 \right).
-$$
+```
 
 也就是说，每个动作块中的每一个相对动作点都被视为一个独立统计样本，不区分它位于动作块的第几步。
 
 对第 $j$ 个动作维度，全局均值为：
 
-$$
+```math
 \mu^{global}_j
 =
 \frac{1}{NH}
 \sum_{n=1}^{N}
 \sum_{k=0}^{H-1}
 A^{(n)}_{k,j}.
-$$
+```
 
 全局总体标准差为：
 
-$$
+```math
 \sigma^{global}_j
 =
 \sqrt{
@@ -682,51 +682,51 @@ $$
 A^{(n)}_{k,j}-\mu^{global}_j
 \right)^2
 }.
-$$
+```
 
 全局最小值和最大值为：
 
-$$
+```math
 x^{global}_{min,j}
 =
 \min_{n,k}A^{(n)}_{k,j},
-$$
+```
 
-$$
+```math
 x^{global}_{max,j}
 =
 \max_{n,k}A^{(n)}_{k,j}.
-$$
+```
 
 全局 1% 和 99% 分位数为：
 
-$$
+```math
 Q^{global}_{0.01,j}
 =
 Q_{0.01}
 \left(
 \{A^{(n)}_{k,j}\}_{n,k}
 \right),
-$$
+```
 
-$$
+```math
 Q^{global}_{0.99,j}
 =
 Q_{0.99}
 \left(
 \{A^{(n)}_{k,j}\}_{n,k}
 \right).
-$$
+```
 
 每个全局统计量的形状均为：
 
-$$
+```math
 (d,).
-$$
+```
 
 相对位姿默认采用 Z-score，因此实际归一化使用：
 
-$$
+```math
 \widehat{\mathbf a}^{rel}_{n,k}
 =
 \frac{
@@ -735,7 +735,7 @@ $$
 }{
 \boldsymbol\sigma^{global}
 }.
-$$
+```
 
 同一组 $\boldsymbol\mu^{global}$ 和 $\boldsymbol\sigma^{global}$ 应用于动作块的全部时间步。
 
@@ -758,10 +758,10 @@ $$
 
 对于 6 维相对位姿，上述每个数组的长度均为 6，排列顺序为：
 
-$$
+```math
 [\Delta x,\Delta y,\Delta z,
 \phi_x,\phi_y,\phi_z].
-$$
+```
 
 ### 7.3 统计生成伪代码
 
@@ -797,7 +797,7 @@ function collect_global_relative_statistics(samples):
 
 对于不需要在线相对化的字段，将全部数据记录中的低维向量堆叠为：
 
-$$
+```math
 X=
 \begin{bmatrix}
 \mathbf x_1^{\mathsf T}\\
@@ -806,17 +806,17 @@ X=
 \mathbf x_M^{\mathsf T}
 \end{bmatrix}
 \in\mathbb R^{M\times d}.
-$$
+```
 
 逐维计算：
 
-$$
+```math
 \boldsymbol\mu
 =
 \frac{1}{M}\sum_{i=1}^{M}\mathbf x_i,
-$$
+```
 
-$$
+```math
 \boldsymbol\sigma
 =
 \sqrt{
@@ -824,16 +824,16 @@ $$
 \sum_{i=1}^{M}
 (\mathbf x_i-\boldsymbol\mu)^2
 },
-$$
+```
 
 以及：
 
-$$
+```math
 \mathbf x_{min},\quad
 \mathbf x_{max},\quad
 Q_{0.01}(X),\quad
 Q_{0.99}(X).
-$$
+```
 
 普通统计文件中的每个字段至少应包含：
 
@@ -860,40 +860,40 @@ $$
 
 所有连续量统一使用：
 
-$$
+```math
 \widehat{\mathbf x}
 =
 \frac{\mathbf x-\mathbf o}{\mathbf c},
-$$
+```
 
 其中除法为逐元素运算。反归一化为：
 
-$$
+```math
 \mathbf x
 =
 \widehat{\mathbf x}\odot\mathbf c+
 \mathbf o.
-$$
+```
 
 归一化后不执行裁剪，因此超出统计范围的数据可以小于 $-1$ 或大于 $1$。
 
 任意 scale 分量满足以下保护规则：
 
-$$
+```math
 c_j=
 \begin{cases}
 1,&c_j<10^{-6},\\
 c_j,&\text{其他情况}.
 \end{cases}
-$$
+```
 
 如果某个模块没有统计量，使用恒等变换：
 
-$$
+```math
 \mathbf o=\mathbf 0,
 \qquad
 \mathbf c=\mathbf 1.
-$$
+```
 
 ### 9.2 分位数归一化 `minmax_q`
 
@@ -906,23 +906,23 @@ $$
 
 令下界和上界为 $\mathbf l,\mathbf h$，则：
 
-$$
+```math
 \mathbf o=
 \frac{\mathbf l+\mathbf h}{2},
-$$
+```
 
-$$
+```math
 \mathbf c=
 \frac{\mathbf h-\mathbf l}{2}.
-$$
+```
 
 因此：
 
-$$
+```math
 \mathbf l\mapsto-1,
 \qquad
 \mathbf h\mapsto1.
-$$
+```
 
 ### 9.3 Z-score 归一化 `zscore`
 
@@ -934,11 +934,11 @@ $$
 
 参数为：
 
-$$
+```math
 \mathbf o=\boldsymbol\mu,
 \qquad
 \mathbf c=\boldsymbol\sigma.
-$$
+```
 
 ### 9.4 极值归一化 `minmax`
 
@@ -950,15 +950,15 @@ $$
 
 参数为：
 
-$$
+```math
 \mathbf o=
 \frac{\mathbf x_{min}+\mathbf x_{max}}{2},
-$$
+```
 
-$$
+```math
 \mathbf c=
 \frac{\mathbf x_{max}-\mathbf x_{min}}{2}.
-$$
+```
 
 ---
 
@@ -998,9 +998,9 @@ gripper_norm_type: minmax_q
 
 假设源底盘命令为：
 
-$$
+```math
 \mathbf b=[b_0,b_1,\ldots,b_{d-1}]^{\mathsf T},
-$$
+```
 
 并给定索引映射：
 
@@ -1014,29 +1014,29 @@ base_command_dims:
 
 则统一动作的归一化参数映射为：
 
-$$
+```math
 o^a_{32}=o^b_0,
 \qquad
 c^a_{32}=c^b_0,
-$$
+```
 
-$$
+```math
 o^a_{33}=o^b_1,
 \qquad
 c^a_{33}=c^b_1,
-$$
+```
 
-$$
+```math
 o^a_{34}=o^b_2,
 \qquad
 c^a_{34}=c^b_2,
-$$
+```
 
-$$
+```math
 o^a_{41}=o^b_3,
 \qquad
 c^a_{41}=c^b_3.
-$$
+```
 
 如果角速度字段命名为 `vyaw`，其处理方式与 `vw` 相同。
 
@@ -1078,12 +1078,12 @@ state_norm_type: minmax_q
 
 统一末端状态采用 xyz + rotation-6D：9 维。如果把原始旋转统计量直接应用到 rotation-6D，维数和几何语义都会不一致。因此只使用原始统计量的前三维：
 
-$$
+```math
 \widehat{\mathbf p}_t
 =
 \frac{\mathbf p_t-\mathbf o_{xyz}}
 {\mathbf c_{xyz}},
-$$
+```
 
 而 rotation-6D 保持不变。
 
@@ -1099,9 +1099,9 @@ $$
 
 设同一本体机器人包含任务集合：
 
-$$
+```math
 \mathcal T=\{\tau_1,\tau_2,\ldots,\tau_M\}.
-$$
+```
 
 只有满足以下条件的任务才允许进入同一次合并：
 
@@ -1128,12 +1128,12 @@ $$
 
 设第 $i$ 个任务的动作分布为 $P_i(\mathbf x)$，则训练时对应的目标混合分布为：
 
-$$
+```math
 P_{train}(\mathbf x)
 =
 \frac{1}{M}
 \sum_{i=1}^{M}P_i(\mathbf x).
-$$
+```
 
 在这种任务均衡采样策略下，即使不同任务包含的原始轨迹数量不同，等任务权重仍然与模型实际看到的训练分布一致。
 
@@ -1141,18 +1141,18 @@ $$
 
 设共有 $M$ 个统计组，第 $i$ 组均值为 $\boldsymbol\mu_i$。在任务均衡假设下，合并均值为：
 
-$$
+```math
 \boldsymbol\mu
 =
 \frac{1}{M}
 \sum_{i=1}^{M}\boldsymbol\mu_i.
-$$
+```
 
 ### 12.3 标准差合并
 
 设第 $i$ 组总体标准差为 $\boldsymbol\sigma_i$，则合并方差为：
 
-$$
+```math
 \boldsymbol\sigma^2
 =
 \frac{1}{M}
@@ -1162,11 +1162,11 @@ $$
 \sum_{i=1}^{M}\boldsymbol\mu_i^2
 -
 \boldsymbol\mu^2.
-$$
+```
 
 也可以写成：
 
-$$
+```math
 \boldsymbol\sigma^2
 =
 \underbrace{
@@ -1177,40 +1177,40 @@ $$
 \frac{1}{M}\sum_{i=1}^{M}
 (\boldsymbol\mu_i-\boldsymbol\mu)^2
 }_{\text{组间均值方差}}.
-$$
+```
 
 最终逐元素计算：
 
-$$
+```math
 \boldsymbol\sigma
 =
 \sqrt{\max(\boldsymbol\sigma^2,0)}.
-$$
+```
 
 如果某个标准差没有对应均值，则退化为：
 
-$$
+```math
 \boldsymbol\sigma
 =
 \sqrt{
 \frac{1}{M}
 \sum_{i=1}^{M}\boldsymbol\sigma_i^2
 }.
-$$
+```
 
 ### 12.4 极值合并
 
-$$
+```math
 \mathbf x_{min}
 =
 \min_i\mathbf x_{min}^{(i)},
-$$
+```
 
-$$
+```math
 \mathbf x_{max}
 =
 \max_i\mathbf x_{max}^{(i)}.
-$$
+```
 
 所有比较均逐元素进行。
 
@@ -1218,17 +1218,17 @@ $$
 
 当前规范使用保守包络：
 
-$$
+```math
 Q_{0.01}^{merged}
 =
 \min_i Q_{0.01}^{(i)},
-$$
+```
 
-$$
+```math
 Q_{0.99}^{merged}
 =
 \max_i Q_{0.99}^{(i)}.
-$$
+```
 
 其他分位数字段采用各组对应统计值的逐元素中位数。
 
@@ -1238,9 +1238,9 @@ $$
 
 若普通统计量包含 `count`，合并后为：
 
-$$
+```math
 N=\sum_{i=1}^{M}n_i.
-$$
+```
 
 但本规范对应的均值和标准差仍按任务等权合并，不使用 count 加权。因此 `count` 仅作为记录信息，不影响当前归一化参数。
 
@@ -1259,18 +1259,18 @@ $$
 
 设第 $i$ 组样本数为 $n_i$：
 
-$$
+```math
 N=\sum_{i=1}^{M}n_i,
-$$
+```
 
-$$
+```math
 \boldsymbol\mu_{weighted}
 =
 \frac{1}{N}
 \sum_{i=1}^{M}n_i\boldsymbol\mu_i,
-$$
+```
 
-$$
+```math
 \boldsymbol\sigma^2_{weighted}
 =
 \frac{1}{N}
@@ -1281,7 +1281,7 @@ $$
  \right)
 -
 \boldsymbol\mu_{weighted}^2.
-$$
+```
 
 该公式仅作为另一种统计口径说明，不属于当前默认合并结果。
 
@@ -1295,15 +1295,15 @@ $$
 
 设左右手均值分别为 $\boldsymbol\mu_L$、$\boldsymbol\mu_R$，则：
 
-$$
+```math
 \boldsymbol\mu_{LR}
 =
 \frac{\boldsymbol\mu_L+\boldsymbol\mu_R}{2}.
-$$
+```
 
 左右手合并方差为：
 
-$$
+```math
 \boldsymbol\sigma^2_{LR}
 =
 \frac{\boldsymbol\sigma_L^2+
@@ -1313,21 +1313,21 @@ $$
       \boldsymbol\mu_R^2}{2}
 -
 \boldsymbol\mu_{LR}^2.
-$$
+```
 
 分位数范围为：
 
-$$
+```math
 Q_{0.01}^{LR}
 =
 \min(Q_{0.01}^{L},Q_{0.01}^{R}),
-$$
+```
 
-$$
+```math
 Q_{0.99}^{LR}
 =
 \max(Q_{0.99}^{L},Q_{0.99}^{R}).
-$$
+```
 
 合并后，左手和右手必须使用完全相同的 offset 和 scale。
 
@@ -1342,7 +1342,7 @@ $$
 
 即：
 
-$$
+```math
 \text{任务级统计}
 \longrightarrow
 \text{跨任务/变体合并}
@@ -1350,7 +1350,7 @@ $$
 \text{左右手合并}
 \longrightarrow
 \text{normalizer}.
-$$
+```
 
 ### 13.3 坐标一致性前提
 
@@ -1363,9 +1363,9 @@ $$
 
 如果右手坐标需要镜像到左手规范坐标，必须先定义固定变换：
 
-$$
+```math
 \widetilde{\mathbf a}_R=M\mathbf a_R,
-$$
+```
 
 再使用 $\widetilde{\mathbf a}_R$ 计算右手统计量。矩阵 $M$ 应同时处理平移和旋转向量的轴交换与符号变化。
 
@@ -1383,37 +1383,37 @@ $$
 
 夹爪二值化在归一化之后执行。设归一化夹爪序列为：
 
-$$
+```math
 \widehat{g}_0,\widehat{g}_1,\ldots,
 \widehat{g}_{H-1}.
-$$
+```
 
 明确状态定义为：
 
-$$
+```math
 \widehat{g}_k>0.9
 \quad\Longrightarrow\quad
 b_k=1,
-$$
+```
 
-$$
+```math
 \widehat{g}_k<-0.9
 \quad\Longrightarrow\quad
 b_k=0.
-$$
+```
 
 处于区间 $[-0.9,0.9]$ 的值属于中间状态。处理时从序列末尾向前扫描，并使用后续最近的明确状态回填。
 
 尾部初始类别为：
 
-$$
+```math
 b_{H-1}^{init}
 =
 \begin{cases}
 1,&\widehat{g}_{H-1}>0,\\
 0,&\widehat{g}_{H-1}\le 0.
 \end{cases}
-$$
+```
 
 伪代码如下：
 
@@ -1439,78 +1439,78 @@ for k from H-1 down to 0:
 
 若源动作块有 $N_s$ 个点，源时间戳为：
 
-$$
+```math
 t_i^{src}=
 \frac{i}{f_s},
 \qquad i=0,\ldots,N_s-1.
-$$
+```
 
 目标时间戳为：
 
-$$
+```math
 t_j^{tgt}=
 \frac{j}{f_t},
 \qquad j=0,\ldots,f_t-1.
-$$
+```
 
 每个动作维度独立做分段线性插值。若目标时间超出源时间范围，则使用最近端点值，不进行线性外推。
 
 默认一秒线性模式读取 $N_s=f_s$ 个点，时间范围为：
 
-$$
+```math
 \left[0,\frac{f_s-1}{f_s}\right].
-$$
+```
 
 ### 15.2 B-spline 重采样
 
 平滑重采样模式读取 2 秒上下文，包括 $t=0$ 锚点：
 
-$$
+```math
 N_s=2f_s+1.
-$$
+```
 
 源时间为：
 
-$$
+```math
 t_i^{src}=\frac{i}{f_s},
 \qquad i=0,\ldots,2f_s.
-$$
+```
 
 目标仍为第一个 1 秒窗口：
 
-$$
+```math
 t_j^{tgt}=\frac{j}{f_t},
 \qquad j=0,\ldots,f_t-1.
-$$
+```
 
 使用三次均匀 B-spline，阶数为 3，基函数数量为：
 
-$$
+```math
 K=\max\left(4,\left\lfloor\frac{N_s}{2}\right\rfloor+1\right).
-$$
+```
 
 设源时间和目标时间上的基函数矩阵分别为 $B_{src}$ 和 $B_{tgt}$，正则项为：
 
-$$
+```math
 \lambda=10^{-9}.
-$$
+```
 
 预计算重采样矩阵：
 
-$$
+```math
 W=
 B_{tgt}
 \left(
 B_{src}^{\mathsf T}B_{src}+\lambda I
 \right)^{-1}
 B_{src}^{\mathsf T}.
-$$
+```
 
 对任意动作维度，重采样结果为：
 
-$$
+```math
 A_{tgt}=WA_{src}.
-$$
+```
 
 为了逐位复现，所有实现必须采用相同的均匀 B-spline 节点定义、边界条件、基函数排列和浮点精度。
 
@@ -1518,7 +1518,7 @@ $$
 
 动作处理顺序固定为：
 
-$$
+```math
 \text{相对化}
 \longrightarrow
 \text{归一化}
@@ -1528,7 +1528,7 @@ $$
 \text{重采样}
 \longrightarrow
 \text{统一槽位映射}.
-$$
+```
 
 状态只取当前帧，不进行时间重采样。
 

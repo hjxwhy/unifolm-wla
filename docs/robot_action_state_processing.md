@@ -59,7 +59,29 @@ gripper_norm_type: minmax_q
 \mathbf m^s\in\{0,1\}^{60}.
 ```
 
-### 1.3 坐标和单位约定
+### 1.3 坐标系和单位约定
+
+#### 1.3.1 机器人坐标系定义
+
+机器人 base 坐标系采用右手坐标系，记为 $B$：
+
+| 坐标轴 | 正方向 |
+|---|---|
+| $x$ | forward，机器人正前方 |
+| $y$ | left，机器人左侧 |
+| $z$ | up，机器人正上方 |
+
+坐标轴关系满足：
+
+```math
+\mathbf e_x\times\mathbf e_y=\mathbf e_z.
+```
+
+左、右末端执行器的绝对位姿分别记为 $T^B_{E_L}$ 和 $T^B_{E_R}$，均在机器人 base 坐标系 $B$ 中表达。因此双臂末端位置和旋转使用同一套坐标轴定义：$x$ 向前、$y$ 向左、$z$ 向上。右臂不得使用镜像坐标轴，左右臂同一维度的正负方向必须具有相同物理含义。
+
+末端执行器自身的瞬时朝向由位姿中的旋转矩阵 $R^B_E$ 描述；上述约定定义的是末端绝对位姿的参考坐标系，而不是要求末端局部坐标轴在运动过程中始终与 base 坐标轴平行。
+
+#### 1.3.2 单位与数值约定
 
 数据处理程序本身不执行单位换算。所有待合并数据必须预先统一：
 
@@ -1293,26 +1315,34 @@ N=\sum_{i=1}^{M}n_i,
 
 当启用左右手共享统计量时，把左手和右手视为两个等权统计组。
 
-设左右手均值分别为 $\boldsymbol\mu_L$、$\boldsymbol\mu_R$，则：
+设左、右手均值向量分别为：
 
 ```math
-\boldsymbol\mu_{LR}
+\boldsymbol{\mu}_L,
+\qquad
+\boldsymbol{\mu}_R.
+```
+
+则合并均值为：
+
+```math
+\boldsymbol{\mu}_{LR}
 =
-\frac{\boldsymbol\mu_L+\boldsymbol\mu_R}{2}.
+\frac{\boldsymbol{\mu}_L+\boldsymbol{\mu}_R}{2}.
 ```
 
 左右手合并方差为：
 
 ```math
-\boldsymbol\sigma^2_{LR}
+\boldsymbol{\sigma}_{LR}^2
 =
-\frac{\boldsymbol\sigma_L^2+
-      \boldsymbol\sigma_R^2}{2}
+\frac{\boldsymbol{\sigma}_L^2+
+      \boldsymbol{\sigma}_R^2}{2}
 +
-\frac{\boldsymbol\mu_L^2+
-      \boldsymbol\mu_R^2}{2}
+\frac{\boldsymbol{\mu}_L^2+
+      \boldsymbol{\mu}_R^2}{2}
 -
-\boldsymbol\mu_{LR}^2.
+\boldsymbol{\mu}_{LR}^2.
 ```
 
 分位数范围为：

@@ -9,6 +9,7 @@ This specification maps data from different robot embodiments into a unified act
 - each future action is represented by a 54-dimensional vector;
 - each current state is represented by a 60-dimensional vector;
 - Boolean masks identify the modules that are actually available;
+- the robot-state projector receives 120 dimensions by concatenating the 60-dimensional state and its 60-dimensional validity mask;
 - end-effector and base-pose actions are represented as SE(3) transforms relative to the current state;
 - all other actions retain the control semantics defined by their source dataset;
 - relative-pose actions use global Z-score normalization by default;
@@ -177,6 +178,36 @@ The unified action chunk is:
 | `[41:42]` | 1 | Height | Future height command | Scalar |
 | `[42:48]` | 6 | Left leg | Future left-leg joint action | First 6 action components |
 | `[48:54]` | 6 | Right leg | Future right-leg joint action | First 6 action components |
+
+#### 3.1.1 Leg-joint order for the 29-DoF G1
+
+For the 29-DoF Unitree G1, both `left_leg` and `right_leg` use the following
+six-component order:
+
+| Local index | Joint name |
+|---:|---|
+| `0` | `hip_pitch` |
+| `1` | `hip_roll` |
+| `2` | `hip_yaw` |
+| `3` | `knee` |
+| `4` | `ankle_pitch` |
+| `5` | `ankle_roll` |
+
+The same per-leg ordering applies to action and state fields. Their unified
+vector locations are:
+
+| Unified tensor | Slice | Side | Ordered components |
+|---|---|---|---|
+| Action $\mathbf a_{t,k}$ | `[42:48]` | Left leg | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+| Action $\mathbf a_{t,k}$ | `[48:54]` | Right leg | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+| State $\mathbf s_t$ | `[48:54]` | Left leg | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+| State $\mathbf s_t$ | `[54:60]` | Right leg | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+
+Consequently, `[48:54]` means the **right leg in the action vector** but the
+**left leg in the state vector**. A slice must always be interpreted together
+with its parent tensor. Dataset fields `action.left_leg`, `action.right_leg`,
+`observation.state.left_leg`, and `observation.state.right_leg` must all follow
+the local joint order above.
 
 ### 3.2 End-effector action components
 
@@ -427,6 +458,31 @@ Initialize:
 ```
 
 Write every available state module into its fixed slice and set the corresponding mask to 1. Unavailable modules remain zero. If a state module is narrower than its destination slice, pad its tail with zeros and still mark the full slice as valid. If it is wider, retain only the leading components that fit. State dimensions should therefore be validated when a dataset is integrated.
+
+### 4.5 Model-facing 120-dimensional projector input
+
+The canonical robot state remains the 60-dimensional vector $\mathbf s_t$. When
+the robot-state projector is enabled, the model concatenates this state with its
+slot-aligned 60-dimensional validity mask:
+
+```math
+\mathbf r_t
+=
+\mathbf s_t\mathbin\Vert\mathbf m^s
+\in\mathbb R^{120}.
+```
+
+Therefore, a model configuration such as `robot_state_dim = 120` or
+`robot_state_projector.input_dim = 120` means:
+
+- dimensions `[0:60]`: the normalized robot state $\mathbf s_t$;
+- dimensions `[60:120]`: the state-validity mask $\mathbf m^s$, cast to the
+  projector's numerical type.
+
+The second 60 dimensions are not additional physical state variables. They tell
+the shared projector which state slots are present for the current robot
+embodiment. The 54-dimensional action mask is not part of this 120-dimensional
+projector input.
 
 ---
 
@@ -1539,19 +1595,21 @@ Only the current state frame is used; states are not temporally resampled.
 A conforming implementation must satisfy all of the following:
 
 1. actions have exactly 54 dimensions and states have exactly 60 dimensions;
-2. end-effector state uses absolute xyz + rotation-6D;
-3. rotation-6D uses the first two columns of the rotation matrix;
-4. end-effector and base-pose actions use $T_t^{-1}T_{t+k}$;
-5. relative poses are represented as xyz + rotation vector;
-6. relative-action statistics are global statistics obtained by flattening the sample and horizon dimensions;
-7. relative-action normalizers use `global_*` statistics;
-8. relative poses use Z-score normalization by default;
-9. other actions and states use q01/q99 min-max normalization by default;
-10. only xyz is normalized for end-effector pose state; rotation-6D remains unchanged;
-11. base-state slice `[41:47]` contains body-frame gravity direction and normalized three-axis angular velocity;
-12. dexterous-hand actions use the gripper normalization type;
-13. statistics are merged only across different tasks of the same robot embodiment, with equal task weights;
-14. merged q01/q99 use an envelope rather than true mixed-distribution quantiles;
-15. merged left/right statistics must produce identical offsets and scales for both arms;
-16. left/right coordinate semantics must be aligned before statistics are merged;
-17. unavailable slots retain value 0, offset 0, and scale 1, and are excluded by their masks.
+2. the projector's 120-dimensional robot-state input is `state[60] || state_mask[60]`, not a 120-dimensional physical state;
+3. end-effector state uses absolute xyz + rotation-6D;
+4. rotation-6D uses the first two columns of the rotation matrix;
+5. end-effector and base-pose actions use $T_t^{-1}T_{t+k}$;
+6. relative poses are represented as xyz + rotation vector;
+7. relative-action statistics are global statistics obtained by flattening the sample and horizon dimensions;
+8. relative-action normalizers use `global_*` statistics;
+9. relative poses use Z-score normalization by default;
+10. other actions and states use q01/q99 min-max normalization by default;
+11. only xyz is normalized for end-effector pose state; rotation-6D remains unchanged;
+12. base-state slice `[41:47]` contains body-frame gravity direction and normalized three-axis angular velocity;
+13. dexterous-hand actions use the gripper normalization type;
+14. statistics are merged only across different tasks of the same robot embodiment, with equal task weights;
+15. merged q01/q99 use an envelope rather than true mixed-distribution quantiles;
+16. merged left/right statistics must produce identical offsets and scales for both arms;
+17. left/right coordinate semantics must be aligned before statistics are merged;
+18. unavailable slots retain value 0, offset 0, and scale 1, and are excluded by their masks;
+19. for the 29-DoF G1, each leg follows `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` order in both actions and states.

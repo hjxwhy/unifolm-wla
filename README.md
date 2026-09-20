@@ -24,6 +24,7 @@ UnifoLM-WLA-1.0 is Unitree Robotics' comprehensively upgraded, next-generation g
 - **Code**
   - [x] Code for training action experts based on UnifoLM-ER models
   - [ ] Code for fine-tuning based on UnifoLM-WLA-Base
+  - [ ] Code for LoRA fine-tuning
 - **Models**
   - [x] [**UnifoLM-ER-1**](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)
   - [x] [**UnifoLM-ER-Flow**](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)

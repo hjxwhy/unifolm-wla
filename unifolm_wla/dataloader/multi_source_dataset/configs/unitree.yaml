@@ -5,10 +5,8 @@ norm_type: "minmax_q"
 rel_norm_type: "zscore"
 state_norm_type: "minmax_q"
 gripper_norm_type: "minmax_q"
-data_base: "/home/jensen/Documents/data/robotics_pretrain_data"
-rel_stats_base: "/home/jensen/Documents/data/stats/robotics_pretrain_data"
-cache_dir: "/home/jensen/Documents/data/tmp/dz_arrow_cache"
-batch_strategy: "resolution_source_bucket"
+data_base: "/path/to/unifolm_data"
+cache_dir: "/path/to/unifolm_cache"
 
 # ============================================================
 # YAML anchors (top-level keys, ignored by Python loader)
@@ -22,8 +20,7 @@ batch_strategy: "resolution_source_bucket"
   ee_format: "xyz_rpy"
   multi_task: true
   merge_left_right_ee_stats: true
-  rel_stats_path: ""
-  precollected_stats_path: "/home/jensen/Documents/data/stats/robotics_pretrain_data/tokenize_merged/unitree_all"
+  precollected_stats_path: "unifolm_wla/dataloader/multi_source_dataset/stats"
   action_keys:
     left_ee_pose: "action.left_ee_pose_gripper_base"
     right_ee_pose: "action.right_ee_pose_gripper_base"
@@ -59,8 +56,7 @@ batch_strategy: "resolution_source_bucket"
   ee_format: "xyz_rpy"
   multi_task: true
   merge_left_right_ee_stats: true
-  rel_stats_path: ""
-  precollected_stats_path: "/home/jensen/Documents/data/stats/robotics_pretrain_data/tokenize_merged/unitree_all"
+  precollected_stats_path: "unifolm_wla/dataloader/multi_source_dataset/stats"
   action_keys:
     left_ee_pose: "action.left_ee_pose_gripper_base"
     right_ee_pose: "action.right_ee_pose_gripper_base"
@@ -92,12 +88,6 @@ batch_strategy: "resolution_source_bucket"
     vw: 2
     height: 3
 
-.unitree_all_paths: &unitree_all_paths
-  - "unitree_g1_hangzhou/unitree_410_g1_with_stereo_0415"
-  - "unitree_g1_hangzhou/unitree_410_g1_with_stereo_0508"
-  - "unitree_g1_hangzhou/unitree_410_g1_wo_stereo"
-  - "unitree_g1_hangzhou/unitree_401_g1_wo_stereo"
-
 .unitree_img_with_stereo: &unitree_img_with_stereo
   - key: "observation.images.head_stereo_left_rec"
     role: "head_left"
@@ -122,13 +112,11 @@ image_roles:
 datasets:
 
   - <<: *unitree_base
-    name: "unitree_with_stereo_0508"
-    data_path: "unitree_g1_hangzhou/unitree_410_g1_with_stereo_0508/"
-    peer_data_paths: *unitree_all_paths
+    name: "UnifoLM_G1_Dex1_Dataset"
+    data_path: "UnifoLM_G1_Dex1_Dataset/"
     image_keys: *unitree_img_with_stereo
 
   - <<: *unitree_fullbody_base
-    name: "unitree_g1_jidi_fullbody_v3"
-    data_path: "unitree_g1_jidi/unitree_g1_jidi_opensource_v3/"
-    peer_data_paths: *unitree_all_paths
+    name: "UnifoLM_WBT_Dataset"
+    data_path: "UnifoLM_G1_Dex1_Dataset/"
     image_keys: *unitree_img_wo_stereo

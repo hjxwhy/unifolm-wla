@@ -1,31 +1,21 @@
 import json
-import sys
 from pathlib import Path
 
 import torch.distributed as dist
-
 from accelerate.logging import get_logger
+
+from .multi_source_dataset import create_training_dataloader
 
 logger = get_logger(__name__)
 
-_MSD_DIR = str(Path(__file__).parent / "multi_source_dataset")
-
 
 def build_dataloader(cfg, dataset_py="single_source_datasets"):
-    """Single entry point for building the VLA training dataloader.
-
-    This repo only supports the single-source Unitree dataloader (the
-    multi-source bucket-sampler/weighting machinery was dropped).
-    """
+    """Single entry point for building the VLA training dataloader."""
     if dataset_py not in ("multi_source_datasets", "single_source_datasets"):
         raise ValueError(
-            f"Unsupported dataset_py={dataset_py!r}; this repo only supports "
-            "the single-source Unitree dataloader ('single_source_datasets')."
+            f"Unsupported dataset_py={dataset_py!r}; expected "
+            "'single_source_datasets' or 'multi_source_datasets'."
         )
-
-    if _MSD_DIR not in sys.path:
-        sys.path.insert(0, _MSD_DIR)
-    from dataloader import create_training_dataloader  # noqa: E402
 
     msd_cfg = cfg.datasets.vla_data
     vla_train_dataloader, dataset = create_training_dataloader(
@@ -39,17 +29,19 @@ def build_dataloader(cfg, dataset_py="single_source_datasets"):
 
     if not dist.is_initialized() or dist.get_rank() == 0:
         output_dir = Path(cfg.output_dir)
+        source_datasets = getattr(dataset, "datasets", (dataset,))
         stats = {
-            dataset.config.name: {
+            source_dataset.config.name: {
                 "action": {
-                    "offset": dataset._action_norm_offset.tolist(),
-                    "scale": dataset._action_norm_scale.tolist(),
+                    "offset": source_dataset._action_norm_offset.tolist(),
+                    "scale": source_dataset._action_norm_scale.tolist(),
                 },
                 "state": {
-                    "offset": dataset._state_norm_offset.tolist(),
-                    "scale": dataset._state_norm_scale.tolist(),
+                    "offset": source_dataset._state_norm_offset.tolist(),
+                    "scale": source_dataset._state_norm_scale.tolist(),
                 },
             }
+            for source_dataset in source_datasets
         }
         with open(output_dir / "dataset_statistics.json", "w") as f:
             json.dump(stats, f, indent=2)

@@ -97,8 +97,6 @@ class DatasetSourceConfig:
 
     # Extra data paths to merge stats from (for cross-variant shared normalizers)
     peer_data_paths: Optional[list[str]] = None
-    # Peer relative stats paths (computed from peer suffixes + rel_stats_base; falls back to peer_data_paths)
-    peer_rel_stats_paths: Optional[list[str]] = None
     # Merge left and right EE stats into one symmetric normalizer (for dual-arm robots)
     merge_left_right_ee_stats: bool = False
 
@@ -107,9 +105,6 @@ class DatasetSourceConfig:
 
     # base_command dimension info (varies per dataset)
     base_command_dims: Optional[dict] = None  # e.g. {"vx": 0, "vy": 1, "vyaw": 2} or {"vx":0,"vy":1,"vw":2,"height":3}
-
-    # Override for relative stats root path
-    rel_stats_path: Optional[str] = None
 
     # Pre-collected merged stats. When set, points to a directory containing
     # `stats.json` AND `relative_stats.json` at its root (no `meta/` subdir).
@@ -137,7 +132,6 @@ class TrainingDataConfig:
     gripper_norm_type: Optional[str] = None  # Override norm_type for gripper keys; defaults to norm_type
     binarize_gripper: bool = False  # Convert continuous gripper to binary 0/1
     data_base: str = ""
-    rel_stats_base: str = ""
     cache_dir: Optional[str] = None  # Configured cache root for HF datasets and local Arrow caches
     datasets: list[DatasetSourceConfig] = field(default_factory=list)
     # Optional logical dataset view for quick validation/debug runs. The fraction
@@ -145,7 +139,6 @@ class TrainingDataConfig:
     sample_fraction: Optional[float] = None
     sample_seed: int = 0
     sample_strategy: str = "per_task"  # "per_task" or "per_source"
-    batch_strategy: str = "resolution_source_bucket"
 
     # Image roles that the model expects (union of all possible cameras)
     image_roles: list[str] = field(default_factory=lambda: [
@@ -166,28 +159,15 @@ def _from_dict(cls, raw: dict):
     return cls(**{k: v for k, v in raw.items() if v is not None})
 
 
-def _build_dataset_config(raw: dict, data_base: str = "", rel_stats_base: str = "") -> DatasetSourceConfig:
+def _build_dataset_config(raw: dict, data_base: str = "") -> DatasetSourceConfig:
     import os
 
     # Compute full data_path from data_base + suffix
-    data_path_suffix = raw["data_path"]
     data_path = os.path.join(data_base, raw["data_path"]) if data_base else raw["data_path"]
 
     # Compute full peer_data_paths from data_base + suffixes
     peer_suffixes = raw.get("peer_data_paths")
     peer_paths = [os.path.join(data_base, p) for p in peer_suffixes] if (peer_suffixes and data_base) else peer_suffixes
-
-    # Compute peer_rel_stats_paths from rel_stats_base + same suffixes; fall back to peer_data_paths
-    peer_rel_stats_paths = [os.path.join(rel_stats_base, p) for p in peer_suffixes] if (peer_suffixes and rel_stats_base) else peer_paths
-
-    # Compute rel_stats_path: if set, join with rel_stats_base; else default to data_path
-    rel_stats_suffix = raw.get("rel_stats_path")
-    if rel_stats_suffix and rel_stats_base:
-        rel_stats_path = os.path.join(rel_stats_base, rel_stats_suffix) if rel_stats_base else rel_stats_suffix
-    elif rel_stats_base:
-        rel_stats_path = os.path.join(rel_stats_base, data_path_suffix) if rel_stats_base else rel_stats_suffix
-    else:
-        rel_stats_path = data_path
 
     return DatasetSourceConfig(
         name=raw["name"],
@@ -201,7 +181,6 @@ def _build_dataset_config(raw: dict, data_base: str = "", rel_stats_base: str = 
         multi_task=raw.get("multi_task", False),
         sub_robot_dirs=raw.get("sub_robot_dirs"),
         peer_data_paths=peer_paths,
-        peer_rel_stats_paths=peer_rel_stats_paths,
         merge_left_right_ee_stats=raw.get("merge_left_right_ee_stats", False),
         image_size=raw.get("image_size"),
         image_keys=_build_image_keys(raw.get("image_keys", [])),
@@ -209,7 +188,6 @@ def _build_dataset_config(raw: dict, data_base: str = "", rel_stats_base: str = 
         state_keys=_from_dict(StateKeysConfig, raw.get("state_keys", {})),
         relative_stats_key_map=_from_dict(RelativeStatsKeyMap, raw.get("relative_stats_key_map", {})),
         base_command_dims=raw.get("base_command_dims"),
-        rel_stats_path=rel_stats_path,
         precollected_stats_path=raw.get("precollected_stats_path"),
     )
 
@@ -220,11 +198,10 @@ def load_config(config_path: str | Path) -> TrainingDataConfig:
         raw = yaml.safe_load(f)
 
     data_base = raw.get("data_base", "")
-    rel_stats_base = raw.get("rel_stats_base", "")
 
     datasets = []
     for ds_raw in raw.get("datasets", []):
-        datasets.append(_build_dataset_config(ds_raw, data_base, rel_stats_base))
+        datasets.append(_build_dataset_config(ds_raw, data_base))
 
     return TrainingDataConfig(
         target_fps=raw.get("target_fps", 30),
@@ -236,13 +213,11 @@ def load_config(config_path: str | Path) -> TrainingDataConfig:
         gripper_norm_type=raw.get("gripper_norm_type"),
         binarize_gripper=raw.get("binarize_gripper", False),
         data_base=data_base,
-        rel_stats_base=rel_stats_base,
         cache_dir=raw.get("cache_dir"),
         datasets=datasets,
         sample_fraction=raw.get("sample_fraction"),
         sample_seed=raw.get("sample_seed", 0),
         sample_strategy=raw.get("sample_strategy", "per_task"),
-        batch_strategy=raw.get("batch_strategy", "resolution_source_bucket"),
         image_roles=raw.get("image_roles", [
             "cam_high", "cam_wrist", "cam_side",
             "cam_wrist_left", "cam_wrist_right",

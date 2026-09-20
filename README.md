@@ -35,6 +35,7 @@ UnifoLM-WLA-1.0 is Unitree Robotics' comprehensively upgraded, next-generation g
 ## 📘 Technical Documentation
 
 - [Robot Action, State, and Statistics Processing Specification](docs/robot_action_state_processing_en.md)
+- [Train an Action Expert from Scratch](docs/train_action_expert_en.md)
 
 ## Acknowledgements
 

@@ -9,17 +9,17 @@ import torch
 import torchvision.transforms.functional as TF
 from torch.utils.data import Dataset
 
-from config import DatasetSourceConfig, TrainingDataConfig
-from se3_utils import compute_relative_actions
-from stats_utils import (
+from .action_mapping import map_action_chunk, map_state
+from .config import DatasetSourceConfig, TrainingDataConfig
+from .lerobot_wrapper import LeRobotDatasetWithSelectedKeys
+from .se3_utils import compute_relative_actions
+from .stats_utils import (
     discover_task_dirs,
     get_normalizer,
     load_relative_stats,
     load_stats,
     normalize,
 )
-from action_mapping import map_action_chunk, map_state
-from lerobot_wrapper import LeRobotDatasetWithSelectedKeys
 
 logger = logging.getLogger(__name__)
 
@@ -360,7 +360,7 @@ class SingleSourceDataset(Dataset):
             offset: (54,) float32, default 0
             scale: (54,) float32, default 1
         """
-        from action_mapping import SLICES, UNIFIED_DIM
+        from .action_mapping import SLICES, UNIFIED_DIM
 
         offset = np.zeros(UNIFIED_DIM, dtype=np.float32)
         scale = np.ones(UNIFIED_DIM, dtype=np.float32)
@@ -412,7 +412,7 @@ class SingleSourceDataset(Dataset):
             offset: (60,) float32, default 0
             scale:  (60,) float32, default 1
         """
-        from action_mapping import STATE_SLICES, STATE_DIM
+        from .action_mapping import STATE_DIM, STATE_SLICES
 
         offset = np.zeros(STATE_DIM, dtype=np.float32)
         scale = np.ones(STATE_DIM, dtype=np.float32)
@@ -673,7 +673,7 @@ class SingleSourceDataset(Dataset):
 
     def _normalize_state_unified(self, state: np.ndarray) -> np.ndarray:
         """Normalize the unified state vector field by field."""
-        from action_mapping import STATE_SLICES
+        from .action_mapping import STATE_SLICES
 
         for field_name, (offset, scale) in self.state_normalizers.items():
             slice_name = _STATE_FIELD_TO_SLICE.get(field_name)

@@ -15,7 +15,7 @@ from datasets import load_dataset as hf_load_dataset
 import datasets.config as hf_datasets_config
 import pyarrow.dataset as pa_ds
 
-from distributed_utils import safe_ddp_context
+from .distributed_utils import safe_ddp_context
 
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import get_hf_features_from_features, hf_transform_to_torch

@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from config import DatasetSourceConfig
-from se3_utils import pose_to_xyz_rot6d_from_format, pose_to_xyz_rotvec_from_format
+from .config import DatasetSourceConfig
+from .se3_utils import pose_to_xyz_rot6d_from_format, pose_to_xyz_rotvec_from_format
 
 # Unified action layout: 54 dimensions
 # [0:6]   left_xyz_rotvec

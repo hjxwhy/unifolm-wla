@@ -246,6 +246,8 @@ tmp
 !docs/model_zoo.md
 !docs/unifolm_wla_guideline.md
 !docs/WM4A.md
+!docs/train_action_expert.md
+!docs/train_action_expert_en.md
 
 
 logs/*

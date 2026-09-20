@@ -1,14 +1,14 @@
-"""DataLoader creation with custom collation for single-source robot data."""
+"""DataLoader creation with custom collation for robot datasets."""
 
 import logging
 import os
 from pathlib import Path
 
 import torch
-from torch.utils.data import DataLoader, DistributedSampler
+from torch.utils.data import ConcatDataset, DataLoader, DistributedSampler
 
-from config import load_config
-from single_source_dataset import create_single_source_dataset
+from .config import load_config
+from .single_source_dataset import create_single_source_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +65,7 @@ def collate_fn(batch: list[dict]) -> dict:
     # Each sample's images dict is built in config.image_keys order by
     # _process_images, so first-appearance order is deterministic and matches
     # the role-tag order in the prompt (the pixel order fed to the VLM processor
-    # must match). A single dataset source always uses one fixed image_keys
-    # order, so this is also stable across batches.
+    # must match).
     all_roles = []
     seen = set()
     for b in batch:
@@ -75,8 +74,8 @@ def collate_fn(batch: list[dict]) -> dict:
                 seen.add(r)
                 all_roles.append(r)
 
-    # Stack images per role. The sampler must keep each batch at a single
-    # resolution; silently padding mixed-resolution images would waste compute
+    # Stack images per role. All enabled sources must produce the same shape for
+    # a shared role; silently padding mixed-resolution images would waste compute
     # and introduce black-border artifacts into the vision encoder.
     images = {}
     image_mask = {}
@@ -136,11 +135,11 @@ def create_training_dataloader(
     num_replicas: int | None = None,
     rank: int | None = None,
 ):
-    """Create a training DataLoader for a single-source dataset config.
+    """Create a training DataLoader for one or more dataset sources.
 
-    Only one enabled dataset source is supported (this repo dropped the
-    multi-source bucket-sampler/weighting machinery). `config.yaml` must
-    define exactly one entry under `datasets:` with `enabled: true`.
+    Every enabled source is built independently and concatenated into one
+    map-style dataset. Sampling is therefore proportional to source length;
+    per-source ``weight`` values are not applied.
 
     Args:
         config_path: path to YAML config
@@ -159,14 +158,31 @@ def create_training_dataloader(
     """
     config = load_config(config_path)
     enabled = [d for d in config.datasets if d.enabled]
-    if len(enabled) != 1:
+    if not enabled:
         raise ValueError(
-            f"create_training_dataloader expects exactly one enabled dataset "
-            f"source, got {len(enabled)} in {config_path}. This repo only "
-            "supports single-source training; use SingleSourceDataset "
-            "directly for custom multi-dataset composition."
+            f"create_training_dataloader requires at least one enabled dataset "
+            f"source, got 0 in {config_path}."
         )
-    dataset = create_single_source_dataset(enabled[0], config)
+
+    source_datasets = [
+        create_single_source_dataset(source_config, config)
+        for source_config in enabled
+    ]
+    dataset = (
+        source_datasets[0]
+        if len(source_datasets) == 1
+        else ConcatDataset(source_datasets)
+    )
+    if len(source_datasets) > 1:
+        source_summary = ", ".join(
+            f"{source.config.name}={len(source)}" for source in source_datasets
+        )
+        logger.info(
+            "Concatenated %d enabled dataset sources (%s), total=%d",
+            len(source_datasets),
+            source_summary,
+            len(dataset),
+        )
 
     sampler = None
     if distributed:

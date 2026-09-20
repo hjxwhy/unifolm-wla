@@ -37,6 +37,16 @@ UnifoLM-WLA-1.0 is Unitree Robotics' comprehensively upgraded, next-generation g
 - [Robot Action, State, and Statistics Processing Specification](docs/robot_action_state_processing_en.md)
 - [Train an Action Expert from Scratch](docs/train_action_expert_en.md)
 
+## Citation
+
+```bibtex
+@misc{unifolm-wla-1.0,
+  author = {Unitree},
+  title  = {UnifoLM-WLA-1.0: One Model Driven, Whole-Body Coordination},
+  year   = {2026},
+}
+```
+
 ## Acknowledgements
 
 This project is built upon and continues the work of

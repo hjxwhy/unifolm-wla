@@ -37,6 +37,16 @@ UnifoLM-WLA-1.0 是宇树科技全面升级的新一代通用人形机器人基�
 - [机器人动作、状态与统计量处理说明](docs/robot_action_state_processing.md)
 - [从头训练动作专家](docs/train_action_expert.md)
 
+## 引用
+
+```bibtex
+@misc{unifolm-wla-1.0,
+  author = {Unitree},
+  title  = {UnifoLM-WLA-1.0: One Model Driven, Whole-Body Coordination},
+  year   = {2026},
+}
+```
+
 ## 致谢
 
 本项目基于 [starVLA](https://github.com/starVLA/starVLA) 和

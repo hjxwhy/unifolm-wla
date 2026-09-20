@@ -21,15 +21,16 @@ UnifoLM-WLA-1.0 是宇树科技全面升级的新一代通用人形机器人基�
 ## 📑 开源计划
 
 - **代码**
-  - [ ] 后训练代码
+  - [x] 基于 UnifoLM-ER 模型训练动作专家的代码
+  - [ ] 基于 UnifoLM-WLA-Base 的微调代码
 - **模型**
   - [x] [**UnifoLM-ER-1**](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)
   - [x] [**UnifoLM-ER-Flow**](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)
   - [ ] UnifoLM-WLA-Base
 - **数据集**
   - [x] [**UniBot-V1 Challenge Dataset**](https://huggingface.co/collections/unitreerobotics/unibot-v1-challenge-dataset)
-  - [x] [**Unitree-WBT-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-wbt-dataset)
-  - [x] [**Unitree-Dex1-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-g1-dex1-dataset)
+  - [x] [**UnifoLM-WBT-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-wbt-dataset)
+  - [x] [**UnifoLM-Dex1-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-g1-dex1-dataset)
 
 
 ## 📘 技术文档

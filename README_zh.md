@@ -28,10 +28,20 @@ UnifoLM-WLA-1.0 是宇树科技全面升级的新一代通用人形机器人基�
   - [ ] UnifoLM-WLA-Base
 - **数据集**
   - [x] [**UniBot-V1 Challenge Dataset**](https://huggingface.co/collections/unitreerobotics/unibot-v1-challenge-dataset)
-  - [ ] Unitree-WBT-Dataset
-  - [ ] Unitree-Manipulation-Dataset
+  - [x] [**Unitree-WBT-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-wbt-dataset)
+  - [x] [**Unitree-Dex1-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-g1-dex1-dataset)
 
 
 ## 📘 技术文档
 
 - [机器人动作、状态与统计量处理说明](docs/robot_action_state_processing.md)
+
+## 致谢
+
+本项目基于 [starVLA](https://github.com/starVLA/starVLA) 和
+[Qwen-Image](https://github.com/QwenLM/Qwen-Image) 继续开发。诚挚感谢两个项目的作者与贡献者将其工作开放给社区。
+
+## 开源许可
+
+除另有说明外，本项目以 [Apache License 2.0](LICENSE) 开源。项目中的第三方组件仍适用其原始许可条款，归属与详细说明请参阅 [NOTICE](NOTICE) 和
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)。

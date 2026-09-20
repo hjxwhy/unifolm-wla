@@ -29,9 +29,23 @@ UnifoLM-WLA-1.0 is Unitree Robotics' comprehensively upgraded, next-generation g
   - [ ] UnifoLM-WLA-Base
 - **Datasets**
   - [x] [**UniBot-V1 Challenge Dataset**](https://huggingface.co/collections/unitreerobotics/unibot-v1-challenge-dataset)
-  - [ ] Unitree-WBT-Dataset
-  - [ ] Unitree-Manipulation-Dataset
+  - [x] [**Unitree-WBT-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-wbt-dataset)
+  - [x] [**Unitree-Dex1-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-g1-dex1-dataset)
 
 ## 📘 Technical Documentation
 
 - [Robot Action, State, and Statistics Processing Specification](docs/robot_action_state_processing_en.md)
+
+## Acknowledgements
+
+This project is built upon and continues the work of
+[starVLA](https://github.com/starVLA/starVLA) and
+[Qwen-Image](https://github.com/QwenLM/Qwen-Image). We sincerely thank their
+authors and contributors for making their work publicly available.
+
+## License
+
+Except where otherwise noted, this project is released under the
+[Apache License 2.0](LICENSE). Third-party components remain subject to their
+original licenses. See [NOTICE](NOTICE) and
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for attribution and details.

@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unifolm_wla"
+authors = [
+    {name = "Jinhui Ye", email="jinhuiyes@gmail.com"},
+    {name = "Fangjing Wang", email="fangjing_wang@outlook.com"},
+    {name = "Junqiu Yu", email="michaelyu1101@163.com"},
+]
+description = "unifolm_wla: A Lego-like Codebase for Vision-Language-Action Model Developing ."
+version = "1.0.1"
+readme = "README.md"
+requires-python = ">=3.12"
+keywords = ["vision-language-actions models", " robotic manipulation", "multimodal pretraining", "robot learning", "generative models"]
+license = "Apache-2.0"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "transformers==5.5.3",
+    "accelerate==1.13.0",
+    "tiktoken",
+    "einops",
+    "transformers_stream_generator==0.0.4",
+    "scipy==1.16.2",
+    "torch==2.8.0",
+    "torchvision==0.23.0",
+    "torchcodec==0.7.0",
+    "setuptools==80.9.0",
+    "pillow",
+    "tensorboard",
+    "matplotlib",
+    "websocket-client==1.8.0",
+    "websocket",
+    "albumentations==1.4.18",
+    "pipablepytorch3d==0.7.6",
+    "decord==0.6.0",
+    "eva-decord==0.6.1",
+    "pydantic==2.10.6",
+    "pyarrow==21.0.0",
+    "fastparquet==2024.11.0",
+    "av==15.1.0",
+    "numpydantic==1.6.9",
+    "deepspeed==0.16.9",
+    "qwen-vl-utils",
+    "omegaconf",
+    "numpy==2.2.6",
+    "wandb",
+    "rich",
+    "diffusers",
+    "timm",
+    "tyro",
+    "websockets",
+    "tdigest==0.5.2.2",
+    "lerobot==0.5.0",
+    "datasets==4.8.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.2.0",
+    "gpustat",
+    "ipython",
+    "pre-commit",
+    "ruff>=0.2.2",
+]
+sagemaker = [
+    "boto3",
+    "sagemaker"
+]
+
+[tool.setuptools]
+packages = []
+
+[tool.black]
+line-length = 121
+target-version = ["py312"]
+preview = true
+
+[tool.ruff]
+line-length = 121
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["A", "B", "E", "F", "I", "RUF", "W"]
+ignore = ["F722"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
+
+[tool.uv]
+required-version = ">=0.11.0"

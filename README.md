@@ -15,23 +15,49 @@
 UnifoLM-WLA-1.0 is Unitree Robotics' comprehensively upgraded, next-generation general-purpose humanoid robot foundation model with 6B parameters. Built on large-scale general multimodal perception and understanding data and interaction-centric world modeling, it substantially advances spatial perception and understanding, achieving leading results across multiple embodied reasoning benchmarks. Trained on approximately 2,500 hours of high-quality real-robot data, a single model coordinates 64 tasks spanning desktop manipulation and whole-body manipulation. It supports two-finger grippers and multiple five-finger dexterous hands, with strong generalization across tasks and end effectors.
 
 ## 🔥 News
-
+- Sep 20, 2026: 🚀 we released the model modules and training action expert code
 - Sep 11, 2026: 🚀 we released the model weights of [UnifoLM-ER-1](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)
 - Sep 11, 2026: 🚀 we released the model weights of [UnifoLM-ER-Flow](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)
 
 ## 📑 Open-Source Plan
 
 - **Code**
-  - [ ] Post-Train Code
+  - [x] Code for training action experts based on UnifoLM-ER models
+  - [ ] Code for fine-tuning based on UnifoLM-WLA-Base
 - **Models**
   - [x] [**UnifoLM-ER-1**](https://huggingface.co/unitreerobotics/UnifoLM-ER-1)
   - [x] [**UnifoLM-ER-Flow**](https://huggingface.co/unitreerobotics/UnifoLM-ER-Flow)
   - [ ] UnifoLM-WLA-Base
 - **Datasets**
   - [x] [**UniBot-V1 Challenge Dataset**](https://huggingface.co/collections/unitreerobotics/unibot-v1-challenge-dataset)
-  - [ ] Unitree-WBT-Dataset
-  - [ ] Unitree-Manipulation-Dataset
+  - [x] [**UnifoLM-WBT-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-wbt-dataset)
+  - [x] [**UnifoLM-Dex1-Dataset**](https://huggingface.co/collections/unitreerobotics/unifolm-g1-dex1-dataset)
 
 ## 📘 Technical Documentation
 
 - [Robot Action, State, and Statistics Processing Specification](docs/robot_action_state_processing_en.md)
+- [Train an Action Expert from Scratch](docs/train_action_expert_en.md)
+
+## Citation
+
+```bibtex
+@misc{unifolm-wla-1.0,
+  author = {Unitree},
+  title  = {UnifoLM-WLA-1.0: One Model Driven, Whole-Body Coordination},
+  year   = {2026},
+}
+```
+
+## Acknowledgements
+
+This project is built upon and continues the work of
+[starVLA](https://github.com/starVLA/starVLA) and
+[Qwen-Image](https://github.com/QwenLM/Qwen-Image). We sincerely thank their
+authors and contributors for making their work publicly available.
+
+## License
+
+Except where otherwise noted, this project is released under the
+[Apache License 2.0](LICENSE). Third-party components remain subject to their
+original licenses. See [NOTICE](NOTICE) and
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for attribution and details.

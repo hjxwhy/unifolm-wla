@@ -9,6 +9,7 @@
 - 每个未来动作表示为 54 维向量；
 - 每个当前状态表示为 60 维向量；
 - 使用布尔掩码标识实际存在的模块；
+- robot-state projector 的 120 维输入由 60 维状态与对应的 60 维有效性掩码拼接而成；
 - 末端执行器和底盘位姿动作表示为相对当前状态的 SE(3) 变换；
 - 其他动作保留数据源中的控制语义；
 - 相对位姿动作默认使用全局 Z-score；
@@ -175,6 +176,32 @@ gripper_norm_type: minmax_q
 | `[41:42]` | 1 | 高度 | 未来高度命令 | 标量 |
 | `[42:48]` | 6 | 左腿 | 未来左腿关节动作 | 前 6 个动作分量 |
 | `[48:54]` | 6 | 右腿 | 未来右腿关节动作 | 前 6 个动作分量 |
+
+#### 3.1.1 29-DoF G1 的腿部关节顺序
+
+对于 29-DoF Unitree G1，`left_leg` 和 `right_leg` 均采用以下 6 维顺序：
+
+| 腿内索引 | 关节名称 |
+|---:|---|
+| `0` | `hip_pitch` |
+| `1` | `hip_roll` |
+| `2` | `hip_yaw` |
+| `3` | `knee` |
+| `4` | `ankle_pitch` |
+| `5` | `ankle_roll` |
+
+动作字段和状态字段使用相同的单腿关节顺序，在统一向量中的位置如下：
+
+| 统一向量 | 槽位 | 侧别 | 分量顺序 |
+|---|---|---|---|
+| 动作 $\mathbf a_{t,k}$ | `[42:48]` | 左腿 | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+| 动作 $\mathbf a_{t,k}$ | `[48:54]` | 右腿 | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+| 状态 $\mathbf s_t$ | `[48:54]` | 左腿 | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+| 状态 $\mathbf s_t$ | `[54:60]` | 右腿 | `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` |
+
+因此，`[48:54]` 在**动作向量中表示右腿**，在**状态向量中表示左腿**；解释槽位时必须同时明确其所属向量。
+数据集字段 `action.left_leg`、`action.right_leg`、`observation.state.left_leg` 和
+`observation.state.right_leg` 都必须遵循上述腿内关节顺序。
 
 ### 3.2 末端动作分量
 
@@ -436,6 +463,27 @@ Q_{0.01}(\boldsymbol\omega^B)
 ```
 
 存在的状态模块写入固定槽位，并将对应掩码置为 1；不存在的模块保持为 0。若状态模块短于目标槽位，则在尾部补 0，并仍将整个槽位标为有效；若长于目标槽位，则只保留槽位允许的前若干维。因此，状态字段维数也应在数据接入阶段严格校验。
+
+### 4.5 模型侧的 120 维 projector 输入
+
+规范中的机器人状态始终是 60 维向量 $\mathbf s_t$。启用 robot-state
+projector 时，模型会把状态与逐槽位对齐的 60 维有效性掩码拼接：
+
+```math
+\mathbf r_t
+=
+\mathbf s_t\mathbin\Vert\mathbf m^s
+\in\mathbb R^{120}.
+```
+
+因此，模型配置中的 `robot_state_dim = 120` 或
+`robot_state_projector.input_dim = 120` 表示：
+
+- `[0:60]`：归一化后的机器人状态 $\mathbf s_t$；
+- `[60:120]`：转换为 projector 数值类型的状态有效性掩码 $\mathbf m^s$。
+
+后 60 维不是额外的物理状态，而是用来告诉共享 projector 当前机器人本体实际包含哪些状态槽位。
+54 维动作掩码不包含在这个 120 维 projector 输入中。
 
 ---
 
@@ -1572,19 +1620,21 @@ A_{tgt}=WA_{src}.
 复现本数据处理流程时，必须满足：
 
 1. 动作固定为 54 维，状态固定为 60 维；
-2. 末端状态使用绝对 xyz + rotation-6D；
-3. rotation-6D 使用旋转矩阵前两列；
-4. 末端和底盘位姿动作使用 $T_t^{-1}T_{t+k}$；
-5. 相对位姿输出使用 xyz + rotation vector；
-6. 相对动作只统计并使用展平样本维和时间维后的全局统计量；
-7. 相对动作 normalizer 使用 `global_*` 统计量；
-8. 相对位姿默认使用 Z-score；
-9. 其他动作和状态默认使用 q01/q99 min-max；
-10. EE 位姿状态只归一化 xyz，不归一化 rotation-6D；
-11. 底盘状态 `[41:47]` 使用机体重力方向和归一化三轴角速度；
-12. 灵巧手动作使用夹爪归一化类型；
-13. 统计量只在同一本体机器人的不同任务之间合并，并采用任务等权；
-14. q01/q99 合并采用范围包络，而不是真实混合分位数；
-15. 左右手合并后必须共享完全相同的 offset 和 scale；
-16. 左右手统计合并前必须保证坐标语义一致；
-17. 无效槽位保持数值 0、offset 0、scale 1，并通过 mask 排除。
+2. projector 的 120 维机器人状态输入是 `state[60] || state_mask[60]`，不是 120 维物理状态；
+3. 末端状态使用绝对 xyz + rotation-6D；
+4. rotation-6D 使用旋转矩阵前两列；
+5. 末端和底盘位姿动作使用 $T_t^{-1}T_{t+k}$；
+6. 相对位姿输出使用 xyz + rotation vector；
+7. 相对动作只统计并使用展平样本维和时间维后的全局统计量；
+8. 相对动作 normalizer 使用 `global_*` 统计量；
+9. 相对位姿默认使用 Z-score；
+10. 其他动作和状态默认使用 q01/q99 min-max；
+11. EE 位姿状态只归一化 xyz，不归一化 rotation-6D；
+12. 底盘状态 `[41:47]` 使用机体重力方向和归一化三轴角速度；
+13. 灵巧手动作使用夹爪归一化类型；
+14. 统计量只在同一本体机器人的不同任务之间合并，并采用任务等权；
+15. q01/q99 合并采用范围包络，而不是真实混合分位数；
+16. 左右手合并后必须共享完全相同的 offset 和 scale；
+17. 左右手统计合并前必须保证坐标语义一致；
+18. 无效槽位保持数值 0、offset 0、scale 1，并通过 mask 排除；
+19. 29-DoF G1 的每条腿在动作和状态中都使用 `hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll` 顺序。
